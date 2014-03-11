@@ -50,6 +50,7 @@ function HandlePBCommand(a_Split, a_Player)
 		a_Player:SendMessage(cChatColor.Blue .. "/pb add")
 		a_Player:SendMessage(cChatColor.Blue .. "/pb join")
 		a_Player:SendMessage(cChatColor.Blue .. "/pb leave")
+		a_Player:SendMessage(cChatColor.Blue .. "/pb list")
 		return true
 	end
 	
@@ -83,6 +84,13 @@ function HandlePBCommand(a_Split, a_Player)
 		HandleLeaveCommand(a_Split, a_Player)
 		return true
 	end
+	
+	if (Operation == "LIST") then
+		HandleListCommand(a_Split, a_Player)
+		return true
+	end
+	
+	a_Player:SendMessage(cChatColor.Blue .. "Unknown parameter " .. a_Split[2])
 	return true
 end
 

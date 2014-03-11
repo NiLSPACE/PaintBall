@@ -224,3 +224,16 @@ function HandleLeaveCommand(a_Split, a_Player)
 	a_Player:SendMessage(cChatColor.Blue .. "You left the arena.")
 	return true
 end
+
+
+
+
+
+function HandleListCommand(a_Split, a_Player)
+	-- /pb list
+	
+	a_Player:SendMessage(cChatColor.LightBlue .. "There are " .. GetSizeTable(ARENAS) .. " arena(s).")
+	for ArenaName, _ in pairs(ARENAS) do
+		a_Player:SendMessage(cChatColor.Blue .. ArenaName)
+	end
+end
