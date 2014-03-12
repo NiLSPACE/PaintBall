@@ -13,9 +13,10 @@ function OnTakeDamage(a_Receiver, a_TDI)
 	
 	local Receiver = tolua.cast(a_Receiver, "cPlayer")
 	local ReceiverName = Receiver:GetName()
+	local ReceiverState = GetPlayerState(Receiver)
 	
 	-- The player hasn't joined an arena. Lets bail out.
-	if (ARENAJOINED[ReceiverName] == nil) then
+	if (not ReceiverState:HasJoinedArena()) then
 		return false
 	end
 	
@@ -40,16 +41,18 @@ function OnTakeDamage(a_Receiver, a_TDI)
 	
 	local Attacker = tolua.cast(Creator, "cPlayer")
 	local AttackerName = Attacker:GetName()
+	local AttackerState = GetPlayerState(Attacker)
 	
-	if (ARENAJOINED[AttackerName] == nil) then -- Don't let other players who are not in an arena affect playing people.
+	-- Don't let other players who are not in an arena affect playing people.
+	if (not AttackerState:HasJoinedArena()) then
 		return true
 	end
 	
-	if (ARENAJOINED[ReceiverName] ~= ARENAJOINED[AttackerName]) then -- Wut?? Somebody from another arena attacked this player. Let's stop it.
+	if (ReceiverState:GetJoinedArena() ~= AttackerState:GetJoinedArena()) then -- Wut?? Somebody from another arena attacked this player. Let's stop it.
 		return true
 	end
 	
-	local Arena = ARENAJOINED[ReceiverName]
+	local Arena = ReceiverState:GetJoinedArena()
 		
 	
 	local Coords = nil
@@ -97,13 +100,15 @@ end
 
 
 function OnPlayerDestroyed(a_Player)
-	-- The player didn't join an arena. Wen can just leave.
-	if (not ARENAJOINED[a_Player:GetName()]) then
+	local State = GetPlayerState(a_Player)
+	
+	-- The player didn't join an arena. We can just leave.
+	if (not State:HasJoinedArena()) then
 		return false
 	end
 	
 	
-	local Arena = ARENAJOINED[a_Player:GetName()]
+	local Arena = State:GetJoinedArena()
 	local PlayerName = a_Player:GetName()
 	
 	local LobbyCoords = ARENAS[Arena].SpawnPointLobby
@@ -124,17 +129,22 @@ function OnPlayerDestroyed(a_Player)
 		ARENAS[Arena].Teams.Red[PlayerName] = nil
 	end
 	
-	ARENAJOINED[a_Player:GetName()] = nil
+	State:JoinArena(nil)
 end
 
 
 
 
 function OnPlayerMoving(a_Player)
-	if (not ARENAJOINED[a_Player:GetName()]) then
+	-- Get the playerstate.
+	local State = GetPlayerState(a_Player)
+	
+	-- Check if the player has joined any arena's.
+	if (not State:HasJoinedArena()) then
 		return false
 	end
 	
+	-- Heal and feed the player.
 	a_Player:Heal(20)
 	a_Player:Feed(20, 20)
 end
@@ -148,10 +158,13 @@ function OnBlockInteraction(a_Player, a_BlockX, a_BlockY, a_BlockZ, a_BlockFace)
 		return false
 	end
 	
-	if (not ARENAJOINED[a_Player:GetName()]) then
+	local State = GetPlayerState(a_Player)
+	
+	if (not State:HasJoinedArena()) then
 		return false
 	end
 	
+	-- Resend the block.
 	a_Player:GetWorld():SendBlockTo(a_BlockX, a_BlockY, a_BlockZ, a_Player)
 	return true
 end

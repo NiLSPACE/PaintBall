@@ -1,3 +1,11 @@
+
+-- this file manages the saving and loading of the arenas.
+
+
+
+
+
+-- Loads the arenas to Plugins/Paintball/Arenas.ini
 function LoadArenas()
 	local IniFile = cIniFile()
 	
@@ -43,6 +51,11 @@ function LoadArenas()
 	end
 end
 
+
+
+
+
+-- Saves all the arena's to a file.
 function SaveArenas()
 	local IniFile = cIniFile()
 	for ArenaName, Data in pairs(ARENAS) do

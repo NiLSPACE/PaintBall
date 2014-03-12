@@ -16,7 +16,7 @@ function LoadConfig()
 	
 	-- In-game
 	SnowballAmount   = IniFile:GetValueSetI("Game", "AmountGivenSnowballs", 48)
-	DeathsNeeded     = IniFile:GetValueSetI("Game", "DeathsNeeded", 3)
+	g_DeathsNeeded     = IniFile:GetValueSetI("Game", "DeathsNeeded", 3)
 	
 	IniFile:WriteFile(g_Plugin:GetLocalFolder() .. "/Config.ini")
 end

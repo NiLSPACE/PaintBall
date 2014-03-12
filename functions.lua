@@ -65,7 +65,8 @@ function StopArena(a_Arena)
 			World:DoWithPlayer(PlayerName, function(a_Player)
 				a_Player:SendMessage(cChatColor.Rose .. "Arena stopped. The match is over.")
 				a_Player:TeleportToCoords(LobbyCoords.x, LobbyCoords.y, LobbyCoords.z)
-				ARENAJOINED[a_Player:GetName()] = nil
+				local State = GetPlayerState(a_Player)
+				State:JoinArena(nil)
 			end)
 		end
 	end

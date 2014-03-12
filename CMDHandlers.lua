@@ -13,7 +13,8 @@ function HandleSelectCommand(a_Split, a_Player)
 		return true
 	end
 	
-	ARENASELECTED[a_Player:GetName()] = a_Split[3]
+	local State = GetPlayerState(a_Player)
+	State:SelectArena(a_Split[3])
 	a_Player:SendMessage(cChatColor.Blue .. "You selected arena " .. a_Split[3])
 end
 
@@ -43,7 +44,7 @@ function HandleCreateCommand(a_Split, a_Player)
 		HasStarted = false,
 		SpawnPointsBlue = {},
 		SpawnPointsRed = {},
-		SpawnPointSpectator = {}, 
+		SpawnPointsSpectator = {}, 
 		SpawnPointLobby = Vector3f(a_Player:GetPosition()), 
 		Teams = 
 		{
@@ -53,7 +54,8 @@ function HandleCreateCommand(a_Split, a_Player)
 		}
 	}
 	
-	ARENASELECTED[a_Player:GetName()] = a_Split[3]
+	local State = GetPlayerState(a_Player)
+	State:SelectArena(a_Split[3])
 	
 	a_Player:SendMessage(cChatColor.Blue .. "You created arena " .. a_Split[3] .. ". You can now create waypoints.")
 end
@@ -89,13 +91,14 @@ end
 function HandleAddCommand(a_Split, a_Player)
 	-- /pb add {Red/Blue/Spectator}
 	
-	local SelectedArena = ARENASELECTED[a_Player:GetName()]
+	local State = GetPlayerState(a_Player)
 	
 	-- The player doesn't have an area selected.
-	if (SelectedArena == nil) then
+	if (not State:HasArenaSelected()) then
 		a_Player:SendMessage(cChatColor.Rose .. "You don't have any arena selected. Use /pb select {ArenaName} to select an arena.")
 		return true
 	end
+	local SelectedArena = State:GetSelectedArena()
 	
 	-- Not enough parameters.
 	if (a_Split[3] == nil) then
@@ -118,7 +121,7 @@ function HandleAddCommand(a_Split, a_Player)
 	end
 	
 	if (Team == "SPECTATOR") then
-		table.insert(ARENAS[SelectedArena].SpawnPointSpectator, Vector3f(a_Player:GetPosition()))
+		table.insert(ARENAS[SelectedArena].SpawnPointsSpectator, Vector3f(a_Player:GetPosition()))
 		a_Player:SendMessage(cChatColor.Yellow .. "Added new spawnpoint for the spectators.")
 		return true
 	end
@@ -146,13 +149,16 @@ function HandleJoinCommand(a_Split, a_Player)
 		return true
 	end
 	
+	local State = GetPlayerState(a_Player)
+	
 	-- Check if the player already joined an arena.
-	if (ARENAJOINED[a_Player:GetName()] ~= nil) then
+	if (State:HasJoinedArena()) then
 		a_Player:SendMessage(cChatColor.Rose .. "You already joined an arena. Use /pb leave to leave the arena.")
 		return true
 	end
 	
-	ARENAJOINED[a_Player:GetName()] = Arena
+	-- Mark the player as "Has joined <ArenaName>"
+	State:JoinArena(Arena)
 	
 	-- Get the lobby coordinates and teleport the player to it.
 	local ArenaLobby = ARENAS[Arena].SpawnPointLobby
@@ -199,12 +205,13 @@ function HandleLeaveCommand(a_Split, a_Player)
 	-- /pb leave
 	
 	-- The player hasn't joined any arena's
-	if (ARENAJOINED[a_Player:GetName()] == nil) then
+	local State = GetPlayerState(a_Player)
+	if (not State:HasJoinedArena()) then
 		a_Player:SendMessage(cChatColor.Rose .. "You haven't joined an arena.")
 		return true
 	end
 	
-	local ArenaJoined = ARENAJOINED[a_Player:GetName()]
+	local ArenaJoined = State:GetJoinedArena()
 	local LobbyPosition = ARENAS[ArenaJoined].SpawnPointLobby
 	local PlayerName = a_Player:GetName()
 	
@@ -217,7 +224,8 @@ function HandleLeaveCommand(a_Split, a_Player)
 		ARENAS[ArenaJoined].Teams.Spectator[PlayerName] = nil
 	end
 	
-	ARENAJOINED[a_Player:GetName()] = nil
+	-- Leave the arena.
+	State:JoinArena(nil)
 	
 	-- Teleport to the lobby.
 	a_Player:TeleportToCoords(LobbyPosition.x, LobbyPosition.y, LobbyPosition.z)

@@ -1,9 +1,6 @@
 g_Plugin = nil
 ARENAS = {}
 
-ARENASELECTED = {}
-ARENAJOINED = {}
-
 function Initialize(a_Plugin)
 	a_Plugin:SetVersion(1)
 	a_Plugin:SetName("PaintBall")
@@ -28,6 +25,10 @@ function Initialize(a_Plugin)
 end
 
 
+
+
+
+-- The plugin is disabling. Stop all the arena's and save them.
 function OnDisable()
 	-- Stop all the current arena's.
 	for Arena, Data in pairs(ARENAS) do
@@ -39,6 +40,9 @@ function OnDisable()
 	
 	LOG("Disabling Paintball.")
 end
+
+
+
 
 
 function HandlePBCommand(a_Split, a_Player)
