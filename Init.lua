@@ -7,7 +7,7 @@ function Initialize(a_Plugin)
 	
 	LoadConfig()
 	
-	cPluginManager:BindCommand("/pb", "", HandlePBCommand, "")
+	cPluginManager:BindCommand("/pb", "", HandlePBCommand, " - The paintball command.")
 	
 	cPluginManager:AddHook(cPluginManager.HOOK_TAKE_DAMAGE, OnTakeDamage);           -- Needed for the teleporting.
 	cPluginManager:AddHook(cPluginManager.HOOK_PLAYER_DESTROYED, OnPlayerDestroyed)  -- Needed to mark the player as "Not joined any arena's" and to check if there are enough players left to play a match.
@@ -60,37 +60,37 @@ function HandlePBCommand(a_Split, a_Player)
 	end
 	
 	local Operation = a_Split[2]:upper()
-	if (Operation == "SELECT") then
+	if ((Operation == "SELECT") and a_Player:HasPermission("paintball.select")) then
 		HandleSelectCommand(a_Split, a_Player)
 		return true
 	end
 	
-	if (Operation == "CREATE") then
+	if ((Operation == "CREATE") and a_Player:HasPermission("paintball.create")) then
 		HandleCreateCommand(a_Split, a_Player)
 		return true
 	end
 	
-	if (Operation == "LOBBY") then
+	if ((Operation == "LOBBY") and a_Player:HasPermission("paintball.lobby")) then
 		HandleLobbyCommand(a_Split, a_Player)
 		return true
 	end
 	
-	if (Operation == "ADD") then
+	if ((Operation == "ADD") and a_Player:HasPermission("paintball.add")) then
 		HandleAddCommand(a_Split, a_Player)
 		return true
 	end
 	
-	if (Operation == "JOIN") then
+	if ((Operation == "JOIN") and a_Player:HasPermission("paintball.join")) then
 		HandleJoinCommand(a_Split, a_Player)
 		return true
 	end
 	
-	if (Operation == "LEAVE") then
+	if ((Operation == "LEAVE") and a_Player:HasPermission("paintball.leave")) then
 		HandleLeaveCommand(a_Split, a_Player)
 		return true
 	end
 	
-	if (Operation == "LIST") then
+	if ((Operation == "LIST") and a_Player:HasPermission("paintball.list")) then
 		HandleListCommand(a_Split, a_Player)
 		return true
 	end
