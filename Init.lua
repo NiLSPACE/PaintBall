@@ -1,5 +1,4 @@
 g_Plugin = nil
-ARENAS = {}
 
 function Initialize(a_Plugin)
 	a_Plugin:SetVersion(1)
@@ -31,9 +30,11 @@ end
 -- The plugin is disabling. Stop all the arena's and save them.
 function OnDisable()
 	-- Stop all the current arena's.
-	for Arena, Data in pairs(ARENAS) do
-		StopArena(Arena)
-	end
+	ForEachArena(
+		function(a_ArenaState)
+			a_ArenaState:StopArena()
+		end
+	)
 	
 	-- Save all the arenas
 	SaveArenas()

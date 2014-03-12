@@ -21,7 +21,7 @@ function CreatePlayerState(a_Player)
 		
 		-- Changes the arena wich the player has selected.
 		function self:SelectArena(a_Arena)
-			if (ARENAS[a_Arena]) then
+			if (ArenaStateExists(a_Arena)) then
 				SelectedArena = a_Arena
 				return true
 			end

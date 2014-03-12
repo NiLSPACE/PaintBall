@@ -53,41 +53,42 @@ function OnTakeDamage(a_Receiver, a_TDI)
 	end
 	
 	local Arena = ReceiverState:GetJoinedArena()
-		
+	local ArenaState = GetArenaState(Arena)
+	local Teams = ArenaState:GetTeams()
 	
 	local Coords = nil
 	-- Check wich team the player is in, give him snowballs and teleport him to one of their spawn points
-	if (ARENAS[Arena].Teams.Blue[ReceiverName]) then
-		Coords = ARENAS[Arena].SpawnPointsBlue[math.random(1, #ARENAS[Arena].SpawnPointsBlue)]
+	if (Teams.Blue[ReceiverName]) then
+		Coords = ArenaState:GetRandomBlueSpawn()
 		GiveSnowballs(Receiver)
 		
 		-- Update the player information.
-		ARENAS[Arena].Teams.Red[AttackerName].Kills = ARENAS[Arena].Teams.Red[AttackerName].Kills + 1
-		ARENAS[Arena].Teams.Blue[ReceiverName].Deaths = ARENAS[Arena].Teams.Blue[ReceiverName].Deaths + 1
+		Teams.Red[AttackerName].Kills = Teams.Red[AttackerName].Kills + 1
+		Teams.Blue[ReceiverName].Deaths = Teams.Blue[ReceiverName].Deaths + 1
 		
-		BroadcastToArena(Arena, cChatColor.Rose .. AttackerName .. " hit " .. ReceiverName .. " [" .. ARENAS[Arena].Teams.Red[AttackerName].Kills .. "]") 
+		ArenaState:BroadcastMessage(cChatColor.Rose .. AttackerName .. " hit " .. ReceiverName .. " [" .. Teams.Red[AttackerName].Kills .. "]") 
 	end
 	
-	if (ARENAS[Arena].Teams.Red[ReceiverName]) then
-		Coords = ARENAS[Arena].SpawnPointsRed[math.random(1, #ARENAS[Arena].SpawnPointsRed)]
+	if (Teams.Red[ReceiverName]) then
+		Coords = ArenaState:GetRandomRedSpawn()
 		GiveSnowballs(Receiver)
 		
 		-- Update the player information.
-		ARENAS[Arena].Teams.Blue[AttackerName].Kills = ARENAS[Arena].Teams.Blue[AttackerName].Kills + 1
-		ARENAS[Arena].Teams.Red[ReceiverName].Deaths = ARENAS[Arena].Teams.Red[ReceiverName].Deaths + 1
+		Teams.Blue[AttackerName].Kills = Teams.Blue[AttackerName].Kills + 1
+		Teams.Red[ReceiverName].Deaths = Teams.Red[ReceiverName].Deaths + 1
 		
-		BroadcastToArena(Arena, cChatColor.Blue .. AttackerName .. " hit " .. ReceiverName .. " [" .. ARENAS[Arena].Teams.Blue[AttackerName].Kills .. "]")
+		ArenaState:BroadcastMessage(cChatColor.Blue .. AttackerName .. " hit " .. ReceiverName .. " [" .. Teams.Blue[AttackerName].Kills .. "]")
 	end
 	
-	if ((ARENAS[Arena].Teams.Red[ReceiverName] or ARENAS[Arena].Teams.Blue[ReceiverName]).Deaths >= g_DeathsNeeded) then
-		(ARENAS[Arena].Teams.Red[ReceiverName] or ARENAS[Arena].Teams.Blue[ReceiverName]).IsPlaying = false
-		Coords = ARENAS[Arena].SpawnPointLobby
+	if ((Teams.Red[ReceiverName] or Teams.Blue[ReceiverName]).Deaths >= g_DeathsNeeded) then
+		(Teams.Red[ReceiverName] or Teams.Blue[ReceiverName]).IsPlaying = false
+		Coords = SpawnPointLobby
 		Receiver:SendMessage(cChatColor.Rose .. "You died.")
 		
 		-- There are not enough players left to have a proper match. Lets stop the arena.
-		local TotalPlayers = GetNumPlayersInArena(Arena)
+		local TotalPlayers = ArenaState:GetNumPlayingPlayers()
 		if (TotalPlayers < MINPLAYERSNEEDED) then
-			StopArena(Arena)
+			ArenaState:StopArena()
 			return false
 		end
 	end
@@ -107,29 +108,19 @@ function OnPlayerDestroyed(a_Player)
 		return false
 	end
 	
-	
-	local Arena = State:GetJoinedArena()
-	local PlayerName = a_Player:GetName()
-	
-	local LobbyCoords = ARENAS[Arena].SpawnPointLobby
-	
-	-- There are not enough players left to have a proper match. Lets stop the arena.
-	local TotalPlayers = GetNumPlayersInArena(Arena)
-	if (TotalPlayers < MINPLAYERSNEEDED) then
-		StopArena(Arena)
-		return false
-	end
-	
-	-- Remove the player from the team he was on.
-	if (ARENAS[Arena].Teams.Red[PlayerName]) then
-		ARENAS[Arena].Teams.Red[PlayerName] = nil
-	elseif (ARENAS[Arena].Teams.Blue[PlayerName]) then
-		ARENAS[Arena].Teams.Blue[PlayerName] = nil
-	elseif (ARENAS[Arena].Teams.Spectator[PlayerName]) then
-		ARENAS[Arena].Teams.Red[PlayerName] = nil
-	end
+	local ArenaState = GetArenaState(State:GetJoinedArena())
 	
 	State:JoinArena(nil)
+	
+	-- Remove the player from the team he was on.
+	ArenaState:LeaveArena(a_Player:GetName())
+	
+	-- There are not enough players left to have a proper match. Lets stop the arena.
+	local TotalPlayers = ArenaState:GetNumPlayingPlayers()
+	if (TotalPlayers < MINPLAYERSNEEDED) then
+		ArenaState:StopArena()
+		return false
+	end
 end
 
 
