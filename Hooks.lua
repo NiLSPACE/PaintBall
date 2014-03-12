@@ -57,6 +57,11 @@ function OnTakeDamage(a_Receiver, a_TDI)
 	local Teams = ArenaState:GetTeams()
 	
 	local Coords = nil
+	
+	local World = Receiver:GetWorld()
+	World:BroadcastSoundEffect("random.pop", Receiver:GetPosX() * 8, Receiver:GetPosY() * 8, Receiver:GetPosZ() * 8, 1, 126)
+	World:BroadcastSoundEffect("random.pop", Attacker:GetPosX() * 8, Attacker:GetPosY() * 8, Attacker:GetPosZ() * 8, 1, 126)
+	
 	-- Check wich team the player is in, give him snowballs and teleport him to one of their spawn points
 	if (Teams.Blue[ReceiverName]) then
 		Coords = ArenaState:GetRandomBlueSpawn()
@@ -80,6 +85,7 @@ function OnTakeDamage(a_Receiver, a_TDI)
 		ArenaState:BroadcastMessage(cChatColor.Blue .. AttackerName .. " hit " .. ReceiverName .. " [" .. Teams.Blue[AttackerName].Kills .. "]")
 	end
 	
+	-- Check if the player is dead and then check if there are enough players to keep playing.
 	if ((Teams.Red[ReceiverName] or Teams.Blue[ReceiverName]).Deaths >= g_DeathsNeeded) then
 		(Teams.Red[ReceiverName] or Teams.Blue[ReceiverName]).IsPlaying = false
 		Coords = SpawnPointLobby
@@ -89,11 +95,12 @@ function OnTakeDamage(a_Receiver, a_TDI)
 		local TotalPlayers = ArenaState:GetNumPlayingPlayers()
 		if (TotalPlayers < MINPLAYERSNEEDED) then
 			ArenaState:StopArena()
-			return false
+			return true
 		end
 	end
 	
-	Receiver:TeleportToCoords(Coords.x, Coords.y, Coords.z)
+	Receiver:TeleportToCoords(Coords.x, Coords.y + 0.2, Coords.z)
+	return true
 end
 
 
@@ -159,3 +166,8 @@ function OnBlockInteraction(a_Player, a_BlockX, a_BlockY, a_BlockZ, a_BlockFace)
 	a_Player:GetWorld():SendBlockTo(a_BlockX, a_BlockY, a_BlockZ, a_Player)
 	return true
 end
+
+
+
+
+
