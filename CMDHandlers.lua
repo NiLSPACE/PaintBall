@@ -143,6 +143,26 @@ function HandleJoinCommand(a_Split, a_Player)
 		return true
 	end
 	
+	local ArenaState = GetArenaState(Arena)
+	
+	-- Check if there are enough spawnpoints for the red team. (At least one)
+	if (ArenaState:GetNumRedSpawnpoints() == 0) then
+		a_Player:SendMessage(cChatColor.Rose .. "This arena doesn't have any spawnpoints for team red. Please contact an admin.")
+		return true
+	end
+	
+	-- Check if there are enough spawnpoints for the blue team. (At least one)
+	if (ArenaState:GetNumBlueSpawnpoints() == 0) then
+		a_Player:SendMessage(cChatColor.Rose .. "This arena doesn't have any spawnpoints for team blue. Please contact an admin.")
+		return true
+	end
+	
+	-- Check if there are enough spawnpoints for the spectators. (At least one)
+	if (ArenaState:GetNumSpectatorSpawnpoints() == 0) then
+		a_Player:SendMessage(cChatColor.Rose .. "This arena doesn't have any spawnpoints for the spectators. Please contact an admin.")
+		return true
+	end
+	
 	local State = GetPlayerState(a_Player)
 	
 	-- Check if the player already joined an arena.
@@ -154,32 +174,14 @@ function HandleJoinCommand(a_Split, a_Player)
 	-- Mark the player as "Has joined <ArenaName>"
 	State:JoinArena(Arena)
 	
-	local ArenaState = GetArenaState(Arena)
-	
 	-- Get the lobby coordinates and teleport the player to it.
 	local ArenaLobby = ArenaState:GetLobbySpawn()
 	a_Player:TeleportToCoords(ArenaLobby.x, ArenaLobby.y, ArenaLobby.z)
 	
-	local NumPlayersTeamRed = ArenaState:GetNumRedPlayers()
-	local NumPlayersTeamBlue = ArenaState:GetNumBluePlayers()
-	
-	-- Choose a team. choose the team with the lowest players, and if the amount of players is equal then choose randomly.
-	if (NumPlayersTeamRed < NumPlayersTeamBlue) then
-		ArenaState:JoinRedTeam(a_Player:GetName())
-	elseif (NumPlayersTeamRed > NumPlayersTeamBlue) then
-		ArenaState:JoinBlueTeam(a_Player:GetName())
-	else
-		local Team = math.random(1, 2)
-		if (Team == 1) then -- Red team
-			ArenaState:JoinRedTeam(a_Player:GetName())
-		elseif (Team == 2) then -- Blue team
-			ArenaState:JoinBlueTeam(a_Player:GetName())
-		end
-	end
-	
+	ArenaState:JoinArena(a_Player:GetName())
 	a_Player:SendMessage(cChatColor.Blue .. "You joined " .. a_Split[3])
 	
-	local TotalPlayers = NumPlayersTeamRed + NumPlayersTeamBlue + 1 -- Don't forget the new player.
+	local TotalPlayers = ArenaState:GetNumPlayers()
 	-- Check if we have enough players to start the arena.
 	if (TotalPlayers >= MAXPLAYERSNEEDED) then
 		ArenaState:StartArena()

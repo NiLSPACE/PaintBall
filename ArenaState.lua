@@ -9,7 +9,7 @@ g_ArenaStates = {}
 
 function CreateArenaState(a_WorldName, a_LobbySpawn)
 	assert(cRoot:Get():GetWorld(a_WorldName) ~= nil)
-	assert(tolua.type(a_LobbySpawn) == 'Vector3f')
+	assert(tolua.type(a_LobbySpawn) == 'Vector3<float>')
 	
 	local WorldName = a_WorldName
 	local LobbySpawn = a_LobbySpawn
@@ -171,21 +171,21 @@ function CreateArenaState(a_WorldName, a_LobbySpawn)
 	do
 		-- Adds one spawnpoint to the blue team.
 		function self:AddSpawnPointBlue(a_Pos)
-			assert(tolua.type(a_Pos) == 'Vector3f')
+			assert(tolua.type(a_Pos) == 'Vector3<float>')
 			
 			table.insert(SpawnPointsBlue, a_Pos)
 		end
 		
 		-- Add one spawnpoint to the red team.
 		function self:AddSpawnPointRed(a_Pos)
-			assert(tolua.type(a_Pos) == 'Vector3f')
+			assert(tolua.type(a_Pos) == 'Vector3<float>')
 			
 			table.insert(SpawnPointsRed, a_Pos)
 		end
 		
 		-- Add one spawnpoint to the spectators.
 		function self:AddSpawnPointSpectator(a_Pos)
-			assert(tolua.type(a_Pos) == 'Vector3f')
+			assert(tolua.type(a_Pos) == 'Vector3<float>')
 			
 			table.insert(SpawnPointsSpectator, a_Pos)
 		end
@@ -225,6 +225,21 @@ function CreateArenaState(a_WorldName, a_LobbySpawn)
 		-- Returns the table where all the spectator spawnpoints are in.
 		function self:GetSpectatorSpawnpoints()
 			return SpawnPointsSpectator
+		end
+		
+		-- returns the amount of spawnpoints team red has.
+		function self:GetNumRedSpawnpoints()
+			return #SpawnPointsRed
+		end
+		
+		-- returns the amount of spawnpoints team blue has.
+		function self:GetNumBlueSpawnpoints()
+			return #SpawnPointsBlue
+		end
+		
+		-- returns the amount of spawnpoints the spectators have.
+		function self:GetNumSpectatorSpawnpoints()
+			return #SpawnPointsSpectator
 		end
 	end
 	
@@ -324,6 +339,26 @@ function CreateArenaState(a_WorldName, a_LobbySpawn)
 		function self:JoinSpectators(a_PlayerName)
 			Teams.Spectator[a_PlayerName] = true
 		end
+		
+		-- Joins one of the teams. If blue has less then red you join blue and the other way around. If they have an equal amount of players you will join one randomly
+		function self:JoinArena(a_Player)
+			local NumPlayersTeamRed = self:GetNumRedPlayers()
+			local NumPlayersTeamBlue = self:GetNumBluePlayers()
+			
+			-- Choose a team. choose the team with the lowest players, and if the amount of players is equal then choose randomly.
+			if (NumPlayersTeamRed < NumPlayersTeamBlue) then
+				self:JoinRedTeam(a_Player)
+			elseif (NumPlayersTeamRed > NumPlayersTeamBlue) then
+				self:JoinBlueTeam(a_Player)
+			else
+				local Team = math.random(1, 2)
+				if (Team == 1) then -- Red team
+					self:JoinRedTeam(a_Player)
+				elseif (Team == 2) then -- Blue team
+					self:JoinBlueTeam(a_Player)
+				end
+			end
+		end
 	end	
 	
 	
@@ -390,7 +425,7 @@ function CreateArenaState(a_WorldName, a_LobbySpawn)
 	
 	
 	
-	-- Returns the player info of a player.
+	-- Returns the player info of a player. false if it doesn't exist.
 	function self:GetPlayerInfo(a_PlayerName)
 		return (Teams.Red[a_PlayerName] or Teams.Blue[a_PlayerName] or false)
 	end
@@ -443,7 +478,8 @@ function CreateArenaState(a_WorldName, a_LobbySpawn)
 		
 		a_Receiver:TeleportToCoords(Coords.x, Coords.y, Coords.z)
 	end
-		
+	
+	
 	return self
 end
 
@@ -468,7 +504,7 @@ end
 function InitializeArenaState(a_ArenaName, a_WorldName, a_LobbySpawn)
 	assert(type(a_ArenaName) == 'string')
 	assert(cRoot:Get():GetWorld(a_WorldName) ~= nil)
-	assert(tolua.type(a_LobbySpawn) == 'Vector3f')
+	assert(tolua.type(a_LobbySpawn) == 'Vector3<float>')
 	
 	if (g_ArenaStates[a_ArenaName]) then
 		return false
