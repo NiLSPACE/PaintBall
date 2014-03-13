@@ -54,52 +54,8 @@ function OnTakeDamage(a_Receiver, a_TDI)
 	
 	local Arena = ReceiverState:GetJoinedArena()
 	local ArenaState = GetArenaState(Arena)
-	local Teams = ArenaState:GetTeams()
 	
-	local Coords = nil
-	
-	local World = Receiver:GetWorld()
-	World:BroadcastSoundEffect("random.pop", Receiver:GetPosX() * 8, Receiver:GetPosY() * 8, Receiver:GetPosZ() * 8, 1, 126)
-	World:BroadcastSoundEffect("random.pop", Attacker:GetPosX() * 8, Attacker:GetPosY() * 8, Attacker:GetPosZ() * 8, 1, 126)
-	
-	-- Check wich team the player is in, give him snowballs and teleport him to one of their spawn points
-	if (Teams.Blue[ReceiverName]) then
-		Coords = ArenaState:GetRandomBlueSpawn()
-		GiveSnowballs(Receiver)
-		
-		-- Update the player information.
-		Teams.Red[AttackerName].Kills = Teams.Red[AttackerName].Kills + 1
-		Teams.Blue[ReceiverName].Deaths = Teams.Blue[ReceiverName].Deaths + 1
-		
-		ArenaState:BroadcastMessage(cChatColor.Rose .. AttackerName .. " hit " .. ReceiverName .. " [" .. Teams.Red[AttackerName].Kills .. "]") 
-	end
-	
-	if (Teams.Red[ReceiverName]) then
-		Coords = ArenaState:GetRandomRedSpawn()
-		GiveSnowballs(Receiver)
-		
-		-- Update the player information.
-		Teams.Blue[AttackerName].Kills = Teams.Blue[AttackerName].Kills + 1
-		Teams.Red[ReceiverName].Deaths = Teams.Red[ReceiverName].Deaths + 1
-		
-		ArenaState:BroadcastMessage(cChatColor.Blue .. AttackerName .. " hit " .. ReceiverName .. " [" .. Teams.Blue[AttackerName].Kills .. "]")
-	end
-	
-	-- Check if the player is dead and then check if there are enough players to keep playing.
-	if ((Teams.Red[ReceiverName] or Teams.Blue[ReceiverName]).Deaths >= g_DeathsNeeded) then
-		(Teams.Red[ReceiverName] or Teams.Blue[ReceiverName]).IsPlaying = false
-		Coords = SpawnPointLobby
-		Receiver:SendMessage(cChatColor.Rose .. "You died.")
-		
-		-- There are not enough players left to have a proper match. Lets stop the arena.
-		local TotalPlayers = ArenaState:GetNumPlayingPlayers()
-		if (TotalPlayers < MINPLAYERSNEEDED) then
-			ArenaState:StopArena()
-			return true
-		end
-	end
-	
-	Receiver:TeleportToCoords(Coords.x, Coords.y + 0.2, Coords.z)
+	ArenaState:HitPlayer(Attacker, Receiver)
 	return true
 end
 

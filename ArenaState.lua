@@ -114,7 +114,6 @@ function CreateArenaState(a_WorldName, a_LobbySpawn)
 				function(a_Player)
 					local Coords = SpawnPointsSpectator[math.random(1, #SpawnPointsSpectator)]
 					a_Player:TeleportToCoords(Coords.x, Coords.y, Coords.z)
-					GiveSnowballs(a_Player)
 					Teams.Spectator[PlayerName].IsPlaying = true
 					a_Player:SendMessage(cChatColor.Rose .. "Game started.")
 				end
@@ -306,6 +305,7 @@ function CreateArenaState(a_WorldName, a_LobbySpawn)
 				Kills = 0,
 				Deaths = 0,
 				IsPlaying = false,
+				Team = "Red",
 			}
 		end
 		
@@ -316,6 +316,7 @@ function CreateArenaState(a_WorldName, a_LobbySpawn)
 				Kills = 0,
 				Deaths = 0,
 				IsPlaying = false,
+				Team = "Blue",
 			}
 		end
 		
@@ -342,6 +343,8 @@ function CreateArenaState(a_WorldName, a_LobbySpawn)
 		Teams.Red[a_PlayerName] = nil
 		Teams.Blue[a_PlayerName] = nil
 		Teams.Spectator[a_PlayerName] = nil
+		
+		self:CheckIfEnoughPlayers()
 	end
 	
 	
@@ -362,6 +365,85 @@ function CreateArenaState(a_WorldName, a_LobbySpawn)
 		return WorldName
 	end
 	
+	
+	
+	
+	
+	-- Checks if one of the teams doesn't have enough players to keep playing.
+	function self:CheckIfEnoughPlayers()
+		local NumBluePlayers = self:GetNumPlayingBluePlayers()
+		local NumRedPlayers  = self:GetNumPlayingRedPlayers()
+		
+		if (NumBluePlayers <= 0) then
+			self:BroadcastMessage(cChatColor.Rose .. "Red team wins.")
+			self:StopArena()
+			return true
+		elseif (NumRedPlayers <= 0) then
+			self:BroadcastMessage(cChatColor.Blue .. "Blue team wins.")
+			self:StopArena()
+			return true
+		end
+		return false
+	end
+	
+	
+	
+	
+	
+	-- Returns the player info of a player.
+	function self:GetPlayerInfo(a_PlayerName)
+		return (Teams.Red[a_PlayerName] or Teams.Blue[a_PlayerName] or false)
+	end
+	
+	
+	
+	
+	
+	-- Checks if it was friendly fire, plays a nice Pop sound and stops the arena if there are not enough players left.
+	function self:HitPlayer(a_Attacker, a_Receiver)
+		local ColorPrefix = cChatColor.Blue
+		local AttackerName = a_Attacker:GetName()
+		local ReceiverName = a_Receiver:GetName()
+		
+		if (Teams.Red[AttackerName]) then
+			ColorPrefix = cChatColor.Rose
+		end
+		
+		local ReceiverInfo = self:GetPlayerInfo(ReceiverName)
+		local AttackerInfo = self:GetPlayerInfo(AttackerName)
+		
+		if (ReceiverInfo.Team == AttackerInfo.Team) then
+			return
+		end
+		
+		ReceiverInfo.Deaths = ReceiverInfo.Deaths + 1
+		AttackerInfo.Kills = AttackerInfo.Kills + 1
+		
+		local World = a_Receiver:GetWorld()
+		World:BroadcastSoundEffect("random.pop", a_Receiver:GetPosX() * 8, a_Receiver:GetPosY() * 8, a_Receiver:GetPosZ() * 8, 1, 126)
+		World:BroadcastSoundEffect("random.pop", a_Attacker:GetPosX() * 8, a_Attacker:GetPosY() * 8, a_Attacker:GetPosZ() * 8, 1, 126)
+		
+		local Coords = nil
+		if (ReceiverInfo.Team == "Blue") then
+			Coords = self:GetRandomBlueSpawn()
+			self:BroadcastMessage(cChatColor.Rose .. AttackerName .. " hit " .. ReceiverName .. " [" .. AttackerInfo.Kills .. "]")
+		else
+			Coords = self:GetRandomRedSpawn()
+			self:BroadcastMessage(cChatColor.Blue .. AttackerName .. " hit " .. ReceiverName .. " [" .. AttackerInfo.Kills .. "]")
+		end
+
+		if (ReceiverInfo.Deaths >= g_DeathsNeeded) then
+			ReceiverInfo.IsPlaying = false
+			a_Receiver:SendMessage(cChatColor.Rose .. "You died. You had " .. ReceiverInfo.Kills .. " kills.")
+			if (not self:CheckIfEnoughPlayers()) then
+				Coords = LobbyCoords
+			end
+			return
+		end
+		
+		a_Receiver:TeleportToCoords(Coords.x, Coords.y, Coords.z)
+	end
+		
 	return self
 end
 
