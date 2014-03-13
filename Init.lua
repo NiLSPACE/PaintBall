@@ -49,13 +49,13 @@ end
 function HandlePBCommand(a_Split, a_Player)
 	if (#a_Split < 2) then
 		a_Player:SendMessage(cChatColor.Blue .. "Usage:")
-		a_Player:SendMessage(cChatColor.Blue .. "/pb select")
-		a_Player:SendMessage(cChatColor.Blue .. "/pb create")
-		a_Player:SendMessage(cChatColor.Blue .. "/pb lobby")
-		a_Player:SendMessage(cChatColor.Blue .. "/pb add")
-		a_Player:SendMessage(cChatColor.Blue .. "/pb join")
-		a_Player:SendMessage(cChatColor.Blue .. "/pb leave")
-		a_Player:SendMessage(cChatColor.Blue .. "/pb list")
+		if (a_Player:HasPermission("paintball.select")) then a_Player:SendMessage(cChatColor.Blue .. "/pb select") end
+		if (a_Player:HasPermission("paintball.create")) then a_Player:SendMessage(cChatColor.Blue .. "/pb create") end
+		if (a_Player:HasPermission("paintball.lobby"))  then a_Player:SendMessage(cChatColor.Blue .. "/pb lobby")  end
+		if (a_Player:HasPermission("paintball.add"))    then a_Player:SendMessage(cChatColor.Blue .. "/pb add")    end
+		if (a_Player:HasPermission("paintball.join"))   then a_Player:SendMessage(cChatColor.Blue .. "/pb join")   end
+		if (a_Player:HasPermission("paintball.leave"))  then a_Player:SendMessage(cChatColor.Blue .. "/pb leave")  end
+		if (a_Player:HasPermission("paintball.list"))   then a_Player:SendMessage(cChatColor.Blue .. "/pb list")   end
 		return true
 	end
 	
