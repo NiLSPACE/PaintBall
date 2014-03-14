@@ -171,15 +171,39 @@ function HandleJoinCommand(a_Split, a_Player)
 		return true
 	end
 	
-	-- Mark the player as "Has joined <ArenaName>"
-	State:JoinArena(Arena)
+	local ChooseTeam = false
+	
+	if (a_Split[4] ~= nil) then
+		if (not g_CanChooseTeam) then
+			a_Player:SendMessage(cChatColor.Rose .. "You can't choose a team. You will join a random team.")
+		else
+			ChooseTeam = true
+		end
+	end
 	
 	-- Get the lobby coordinates and teleport the player to it.
 	local ArenaLobby = ArenaState:GetLobbySpawn()
 	a_Player:TeleportToCoords(ArenaLobby.x, ArenaLobby.y, ArenaLobby.z)
+	if (ChooseTeam) then
+		local TeamChosen = a_Split[4]:upper()
+		if (TeamChosen == "RED") then
+			ArenaState:JoinRedTeam(a_Player:GetName())
+		elseif (TeamChosen == "BLUE") then
+			ArenaState:JoinBlueTeam(a_Player:GetName())
+		elseif (TeamChosen == "SPECTATOR") then
+			ArenaState:JoinSpectators(a_Player:GetName())
+		else
+			a_Player:SendMessage(cChatColor.Rose .. "Unknown team. You will join a random team.")
+			ArenaState:JoinArena(a_Player:GetName())
+		end
+	else
+		ArenaState:JoinArena(a_Player:GetName())
+	end
 	
-	ArenaState:JoinArena(a_Player:GetName())
 	a_Player:SendMessage(cChatColor.Blue .. "You joined " .. a_Split[3])
+	
+	-- Mark the player as "Has joined <ArenaName>"
+	State:JoinArena(Arena)
 	
 	local TotalPlayers = ArenaState:GetNumPlayers()
 	-- Check if we have enough players to start the arena.
