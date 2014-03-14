@@ -77,13 +77,6 @@ function OnPlayerDestroyed(a_Player)
 	
 	-- Remove the player from the team he was on.
 	ArenaState:LeaveArena(a_Player:GetName())
-	
-	-- There are not enough players left to have a proper match. Lets stop the arena.
-	local TotalPlayers = ArenaState:GetNumPlayingPlayers()
-	if (TotalPlayers < MINPLAYERSNEEDED) then
-		ArenaState:StopArena()
-		return false
-	end
 end
 
 
