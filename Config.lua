@@ -1,6 +1,5 @@
 
 MAXPLAYERSNEEDED = 2
-MINPLAYERSNEEDED = 2
 
 SnowballAmount = 48
 g_DeathsNeeded = 3 -- When a player has reached this amount of deaths he will be kicked from the arena.
@@ -13,7 +12,6 @@ function LoadConfig()
 	
 	-- General
 	MAXPLAYERSNEEDED = IniFile:GetValueSetI("General", "MaxPlayersNeeded", 2)
-	MINPLAYERSNEEDED = IniFile:GetValueSetI("General", "MinPlayersNeeded", 2)
 	
 	-- In-game
 	SnowballAmount   = IniFile:GetValueSetI("Game", "AmountGivenSnowballs", 48)
