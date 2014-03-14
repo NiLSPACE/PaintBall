@@ -32,7 +32,7 @@ function OnDisable()
 	-- Stop all the current arena's.
 	ForEachArena(
 		function(a_ArenaState)
-			a_ArenaState:StopArena()
+			a_ArenaState:StopArena(true)
 		end
 	)
 	
