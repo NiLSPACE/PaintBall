@@ -68,7 +68,7 @@ function SaveArenas()
 		for Idx, SpawnPoint in pairs(Data["GetSpectatorSpawnpoints"]()) do
 			SpawnPointString = SpawnPointString .. SpawnPoint.x .. "," .. SpawnPoint.y .. "," .. SpawnPoint.z .. ";"
 		end
-		IniFile:SetValue(ArenaName, "SpawnPointSpectator", SpawnPointString)
+		IniFile:SetValue(ArenaName, "SpawnPointsSpectator", SpawnPointString)
 		
 		-- Save the worldname
 		IniFile:SetValue(ArenaName, "WorldName", Data["GetWorldName"]())
