@@ -27,6 +27,13 @@ function CreateArenaState(a_WorldName, a_LobbySpawn)
 		Spectator = {}
 	}
 	
+	local Stats =
+	{
+		Kills = 0,
+		TeamAttacks = 0,
+	}
+		
+	
 	-- Create the object with all the functions.
 	local self = {}
 	
@@ -126,13 +133,22 @@ function CreateArenaState(a_WorldName, a_LobbySpawn)
 	
 	
 	-- Stops the arena and teleports all the players who were in the arena to the lobby.
-	function self:StopArena()
+	function self:StopArena(a_ShouldShowStopMessage)
 		HasStarted = false
+		
+		local function SendStats(a_Player)
+			a_Player:SendMessage(cChatColor.Purple .. "Kills: " .. cChatColor.LightGreen .. Stats.Kills)
+			a_Player:SendMessage(cChatColor.Purple .. "TeamAttacks: " .. cChatColor.LightGreen .. Stats.TeamAttacks)
+		end
 		
 		-- Teleport everyone to the lobby.
 		self:ForEachPlayer(
 			function(a_Player)
-				a_Player:SendMessage(cChatColor.Rose .. "Arena stopped. The match is over.")
+				if (a_ShouldShowStopMessage) then
+					a_Player:SendMessage(cChatColor.Rose .. "Arena stopped. The match is over.")
+				end
+				
+				SendStats(a_Player)
 				a_Player:TeleportToCoords(LobbySpawn.x, LobbySpawn.y, LobbySpawn.z)
 				local State = GetPlayerState(a_Player)
 				State:JoinArena(nil)
@@ -146,6 +162,14 @@ function CreateArenaState(a_WorldName, a_LobbySpawn)
 			Red = {}, 
 			Spectator = {}
 		}
+		
+		-- Reset the stats.
+		Stats =
+		{
+			Kills = 0,
+			TeamAttacks = 0,
+		}
+			
 	end
 	
 	
@@ -249,7 +273,7 @@ function CreateArenaState(a_WorldName, a_LobbySpawn)
 	
 	-- This part returns the amount of playing players.
 	do
-		-- Amount of red players.
+		-- Amount of playing red players.
 		function self:GetNumPlayingRedPlayers()
 			local Count = 0
 			for PlayerName, Data in pairs(Teams.Red) do
@@ -261,7 +285,7 @@ function CreateArenaState(a_WorldName, a_LobbySpawn)
 			return Count
 		end
 		
-		-- Amount of blue players
+		-- Amount of playing blue players
 		function self:GetNumPlayingBluePlayers()
 			local Count = 0
 			for PlayerName, Data in pairs(Teams.Blue) do
@@ -278,9 +302,7 @@ function CreateArenaState(a_WorldName, a_LobbySpawn)
 			return (self:GetNumPlayingRedPlayers() + self:GetNumPlayingBluePlayers())
 		end
 		
-		
-		
-		
+		-- Returns the amount of red players
 		function self:GetNumRedPlayers()
 			local Count = 0
 			for PlayerName, Data in pairs(Teams.Red) do
@@ -290,7 +312,7 @@ function CreateArenaState(a_WorldName, a_LobbySpawn)
 			return Count
 		end
 		
-		
+		-- Returns the amount of blue players
 		function self:GetNumBluePlayers()
 			local Count = 0
 			for PlayerName, Data in pairs(Teams.Blue) do
@@ -300,8 +322,7 @@ function CreateArenaState(a_WorldName, a_LobbySpawn)
 			return Count
 		end
 		
-		
-		
+		-- Returns the amount of players.
 		function self:GetNumPlayers()
 			return (self:GetNumRedPlayers() + self:GetNumBluePlayers())
 		end
@@ -448,6 +469,7 @@ function CreateArenaState(a_WorldName, a_LobbySpawn)
 		local AttackerInfo = self:GetPlayerInfo(AttackerName)
 		
 		if (ReceiverInfo.Team == AttackerInfo.Team) then
+			Stats.TeamAttacks = Stats.TeamAttacks + 1
 			return
 		end
 		
@@ -457,6 +479,9 @@ function CreateArenaState(a_WorldName, a_LobbySpawn)
 		local World = a_Receiver:GetWorld()
 		World:BroadcastSoundEffect("random.pop", a_Receiver:GetPosX() * 8, a_Receiver:GetPosY() * 8, a_Receiver:GetPosZ() * 8, 1, 126)
 		World:BroadcastSoundEffect("random.pop", a_Attacker:GetPosX() * 8, a_Attacker:GetPosY() * 8, a_Attacker:GetPosZ() * 8, 1, 126)
+		
+		Stats.Deaths = Stats.Deaths + 1
+		Stats.Kills = Stats.Kills + 1
 		
 		local Coords = nil
 		if (ReceiverInfo.Team == "Blue") then
