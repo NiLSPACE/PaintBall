@@ -480,7 +480,6 @@ function CreateArenaState(a_WorldName, a_LobbySpawn)
 		World:BroadcastSoundEffect("random.pop", a_Receiver:GetPosX() * 8, a_Receiver:GetPosY() * 8, a_Receiver:GetPosZ() * 8, 1, 126)
 		World:BroadcastSoundEffect("random.pop", a_Attacker:GetPosX() * 8, a_Attacker:GetPosY() * 8, a_Attacker:GetPosZ() * 8, 1, 126)
 		
-		Stats.Deaths = Stats.Deaths + 1
 		Stats.Kills = Stats.Kills + 1
 		
 		local Coords = nil
