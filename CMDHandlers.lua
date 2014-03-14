@@ -204,12 +204,6 @@ function HandleJoinCommand(a_Split, a_Player)
 	
 	-- Mark the player as "Has joined <ArenaName>"
 	State:JoinArena(Arena)
-	
-	local TotalPlayers = ArenaState:GetNumPlayers()
-	-- Check if we have enough players to start the arena.
-	if (TotalPlayers >= MAXPLAYERSNEEDED) then
-		ArenaState:StartArena()
-	end
 end
 
 

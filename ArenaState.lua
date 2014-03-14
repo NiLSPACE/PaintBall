@@ -334,6 +334,21 @@ function CreateArenaState(a_WorldName, a_LobbySpawn)
 	
 	-- JoinTeam functions.
 	do
+		local function CheckIfCanStart()
+			if HasStarted then
+				return
+			end
+			
+			local MaxNeeded = MAXPLAYERSNEEDED / 2
+			if (
+				(self:GetNumRedPlayers() >= MaxNeeded) and
+				(self:GetNumBluePlayers() >= MaxNeeded)
+			) then
+				self:StartArena()
+			end
+		end
+				
+		
 		-- Join red team.
 		function self:JoinRedTeam(a_PlayerName)
 			Teams.Red[a_PlayerName] = 
@@ -343,6 +358,8 @@ function CreateArenaState(a_WorldName, a_LobbySpawn)
 				IsPlaying = false,
 				Team = "Red",
 			}
+			
+			CheckIfCanStart()
 		end
 		
 		-- Join blue team.
@@ -354,11 +371,15 @@ function CreateArenaState(a_WorldName, a_LobbySpawn)
 				IsPlaying = false,
 				Team = "Blue",
 			}
+			
+			CheckIfCanStart()
 		end
 		
 		-- Join spectator. A spectator doesn't have any kills or deaths so we just mark him as "There"
 		function self:JoinSpectators(a_PlayerName)
 			Teams.Spectator[a_PlayerName] = true
+			
+			CheckIfCanStart()
 		end
 		
 		-- Joins one of the teams. If blue has less then red you join blue and the other way around. If they have an equal amount of players you will join one randomly
@@ -427,6 +448,10 @@ function CreateArenaState(a_WorldName, a_LobbySpawn)
 	
 	-- Checks if one of the teams doesn't have enough players to keep playing.
 	function self:CheckIfEnoughPlayers()
+		if (not HasStarted) then
+			return
+		end
+		
 		local NumBluePlayers = self:GetNumPlayingBluePlayers()
 		local NumRedPlayers  = self:GetNumPlayingRedPlayers()
 		
@@ -500,6 +525,7 @@ function CreateArenaState(a_WorldName, a_LobbySpawn)
 			return
 		end
 		
+		GiveSnowballs(a_Receiver)
 		a_Receiver:TeleportToCoords(Coords.x, Coords.y, Coords.z)
 	end
 	
