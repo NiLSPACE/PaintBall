@@ -31,6 +31,7 @@ function CreateArenaState(a_WorldName, a_LobbySpawn)
 	{
 		Kills = 0,
 		TeamAttacks = 0,
+		ShotsFired = 0,
 	}
 	
 	local Inventories = {}
@@ -156,6 +157,7 @@ function CreateArenaState(a_WorldName, a_LobbySpawn)
 		local function SendStats(a_Player)
 			a_Player:SendMessage(cChatColor.Purple .. "Kills: " .. cChatColor.LightGreen .. Stats.Kills)
 			a_Player:SendMessage(cChatColor.Purple .. "TeamAttacks: " .. cChatColor.LightGreen .. Stats.TeamAttacks)
+			a_Player:SendMessage(cChatColor.Purple .. "ShotsFired: " .. cChatColor.LightGreen .. Stats.ShotsFired)
 		end
 		
 		-- Teleport everyone to the lobby.
@@ -165,6 +167,7 @@ function CreateArenaState(a_WorldName, a_LobbySpawn)
 					a_Player:SendMessage(cChatColor.Rose .. "Arena stopped. The match is over.")
 				end
 				
+				-- Return the inventory to the player.
 				if (Inventories[a_Player:GetName()] ~= nil) then
 					local Inventory = a_Player:GetInventory()
 					Inventory:Clear()
@@ -520,7 +523,7 @@ function CreateArenaState(a_WorldName, a_LobbySpawn)
 		local AttackerInfo = self:GetPlayerInfo(AttackerName)
 		
 		if (ReceiverInfo.Team == AttackerInfo.Team) then
-			Stats.TeamAttacks = Stats.TeamAttacks + 1
+			self:AddStatsTeamFire()
 			return
 		end
 		
@@ -531,7 +534,7 @@ function CreateArenaState(a_WorldName, a_LobbySpawn)
 		World:BroadcastSoundEffect("random.pop", a_Receiver:GetPosX() * 8, a_Receiver:GetPosY() * 8, a_Receiver:GetPosZ() * 8, 1, 126)
 		World:BroadcastSoundEffect("random.pop", a_Attacker:GetPosX() * 8, a_Attacker:GetPosY() * 8, a_Attacker:GetPosZ() * 8, 1, 126)
 		
-		Stats.Kills = Stats.Kills + 1
+		self:AddStatsKills()
 		
 		local Coords = nil
 		if (ReceiverInfo.Team == "Blue") then
@@ -556,6 +559,26 @@ function CreateArenaState(a_WorldName, a_LobbySpawn)
 	end
 	
 	
+	
+	
+	
+	-- This part manages all the stats.
+	do
+		-- Add one to the kills stats.
+		function self:AddStatsKills()
+			Stats.Kills = Stats.Kills + 1
+		end
+		
+		-- Add one to the TeamFire stats.
+		function self:AddStatsTeamFire()
+			Stats.TeamAttacks = Stats.TeamAttacks + 1
+		end
+		
+		-- Add one to the shots fired stats.
+		function self:AddStatsShotsFired()
+			Stats.ShotsFired = Stats.ShotsFired + 1
+		end
+	end
 	return self
 end
 

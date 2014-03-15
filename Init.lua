@@ -12,6 +12,7 @@ function Initialize(a_Plugin)
 	cPluginManager:AddHook(cPluginManager.HOOK_TAKE_DAMAGE, OnTakeDamage);           -- Needed for the teleporting.
 	cPluginManager:AddHook(cPluginManager.HOOK_PLAYER_DESTROYED, OnPlayerDestroyed)  -- Needed to mark the player as "Not joined any arena's" and to check if there are enough players left to play a match.
 	cPluginManager:AddHook(cPluginManager.HOOK_PLAYER_MOVING, OnPlayerMoving)        -- Needed to heal the players when they are playing.
+	cPluginManager:AddHook(cPluginManager.HOOK_SPAWNED_ENTITY, OnSpawnedEntity)      -- Needed to see how many shots were fired in a match.
 	
 	-- Anti Griefing.
 	cPluginManager:AddHook(cPluginManager.HOOK_PLAYER_RIGHT_CLICK, OnBlockInteraction) -- We don't want other players placing blocks

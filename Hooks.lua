@@ -120,3 +120,42 @@ end
 
 
 
+function OnSpawnedEntity(a_World, a_Entity)
+	if (not a_Entity:IsProjectile()) then
+		return false
+	end
+	
+	local Projectile = tolua.cast(a_Entity, "cProjectileEntity")
+	local ProjectileType = Projectile:GetProjectileKind()
+	
+	if (not ProjectileType == cProjectileEntity.pkSnowball) then
+		return false
+	end
+	
+	local Creator = Projectile:GetCreator()
+	
+	if (not Creator:IsPlayer()) then
+		return false
+	end
+	
+	local PlayerState = GetPlayerState(Creator)
+	if (not PlayerState:HasJoinedArena()) then
+		return false
+	end
+	
+	local JoinedArena = PlayerState:GetJoinedArena()
+	
+	-- Weird. The playerstate says we joined an arena but the arena doesn't exist. Lets "leave" that arena.
+	if (not ArenaStateExists(JoinedArena)) then
+		PlayerState:JoinArena(nil)
+		return false
+	end
+	
+	local ArenaState = GetArenaState(JoinedArena)
+	ArenaState:AddStatsShotsFired()
+	return false
+end
+
+
+
+	
