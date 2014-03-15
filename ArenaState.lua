@@ -32,6 +32,8 @@ function CreateArenaState(a_WorldName, a_LobbySpawn)
 		Kills = 0,
 		TeamAttacks = 0,
 	}
+	
+	local Inventories = {}
 		
 	
 	-- Create the object with all the functions.
@@ -95,6 +97,11 @@ function CreateArenaState(a_WorldName, a_LobbySpawn)
 				function(a_Player)
 					local Coords = SpawnPointsRed[math.random(1, #SpawnPointsRed)]
 					a_Player:TeleportToCoords(Coords.x, Coords.y, Coords.z)
+					
+					local Items = cItems()
+					a_Player:GetInventory():CopyToItems(Items)
+					Inventories[PlayerName] = Items
+					
 					GiveSnowballs(a_Player)
 					Teams.Red[PlayerName].IsPlaying = true
 					a_Player:SendMessage(cChatColor.Rose .. "Game started.")
@@ -108,6 +115,11 @@ function CreateArenaState(a_WorldName, a_LobbySpawn)
 				function(a_Player)
 					local Coords = SpawnPointsBlue[math.random(1, #SpawnPointsBlue)]
 					a_Player:TeleportToCoords(Coords.x, Coords.y, Coords.z)
+					
+					local Items = cItems()
+					a_Player:GetInventory():CopyToItems(Items)
+					Inventories[PlayerName] = Items
+					
 					GiveSnowballs(a_Player)
 					Teams.Blue[PlayerName].IsPlaying = true
 					a_Player:SendMessage(cChatColor.Rose .. "Game started.")
@@ -121,6 +133,11 @@ function CreateArenaState(a_WorldName, a_LobbySpawn)
 				function(a_Player)
 					local Coords = SpawnPointsSpectator[math.random(1, #SpawnPointsSpectator)]
 					a_Player:TeleportToCoords(Coords.x, Coords.y, Coords.z)
+					
+					local Items = cItems()
+					a_Player:GetInventory():CopyToItems(Items)
+					Inventories[PlayerName] = Items
+					
 					Teams.Spectator[PlayerName].IsPlaying = true
 					a_Player:SendMessage(cChatColor.Rose .. "Game started.")
 				end
@@ -148,6 +165,12 @@ function CreateArenaState(a_WorldName, a_LobbySpawn)
 					a_Player:SendMessage(cChatColor.Rose .. "Arena stopped. The match is over.")
 				end
 				
+				if (Inventories[a_Player:GetName()] ~= nil) then
+					local Inventory = a_Player:GetInventory()
+					Inventory:Clear()
+					Inventory:AddItems(Inventories[a_Player:GetName()], true, true)
+				end
+				
 				SendStats(a_Player)
 				a_Player:TeleportToCoords(LobbySpawn.x, LobbySpawn.y, LobbySpawn.z)
 				local State = GetPlayerState(a_Player)
@@ -169,6 +192,9 @@ function CreateArenaState(a_WorldName, a_LobbySpawn)
 			Kills = 0,
 			TeamAttacks = 0,
 		}
+		
+		-- Reset the inventories.
+		Inventories = {}
 			
 	end
 	
