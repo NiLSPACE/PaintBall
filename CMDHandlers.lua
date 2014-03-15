@@ -18,6 +18,7 @@ function HandleSelectCommand(a_Split, a_Player)
 	PlayerState:SelectArena(a_Split[3])
 	
 	a_Player:SendMessage(cChatColor.Blue .. "You selected arena " .. a_Split[3])
+	return true
 end
 
 
@@ -46,6 +47,7 @@ function HandleCreateCommand(a_Split, a_Player)
 	State:SelectArena(a_Split[3])
 	
 	a_Player:SendMessage(cChatColor.Blue .. "You created arena " .. a_Split[3] .. ". You can now create waypoints.")
+	return true
 end
 
 
@@ -75,6 +77,7 @@ function HandleLobbyCommand(a_Split, a_Player)
 	
 	-- Teleport to the lobby.
 	a_Player:TeleportToCoords(Coords.x, Coords.y, Coords.z)
+	return true
 end
 
 
@@ -121,6 +124,7 @@ function HandleAddCommand(a_Split, a_Player)
 	end
 	
 	a_Player:SendMessage(cChatColor.Rose .. "Unknown team. You can use: red, blue and spectator.")
+	return true
 end
 
 
@@ -204,6 +208,7 @@ function HandleJoinCommand(a_Split, a_Player)
 	
 	-- Mark the player as "Has joined <ArenaName>"
 	State:JoinArena(Arena)
+	return true
 end
 
 
@@ -247,4 +252,5 @@ function HandleListCommand(a_Split, a_Player)
 			a_Player:SendMessage(cChatColor.Blue .. a_ArenaName)
 		end
 	)
+	return true
 end
