@@ -167,6 +167,12 @@ function HandleJoinCommand(a_Split, a_Player)
 		return true
 	end
 	
+	-- You can't join if the arena has already started.
+	if (ArenaState:HasStarted()) then
+		a_Player:SendMessage(cChatColor.Rose .. "The arena has already started. Try again later.")
+		return true
+	end
+	
 	local State = GetPlayerState(a_Player)
 	
 	-- Check if the player already joined an arena.
