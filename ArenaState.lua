@@ -152,12 +152,16 @@ function CreateArenaState(a_WorldName, a_LobbySpawn)
 	
 	-- Stops the arena and teleports all the players who were in the arena to the lobby.
 	function self:StopArena(a_ShouldShowStopMessage)
-		HasStarted = false
 		
-		local function SendStats(a_Player)
-			a_Player:SendMessage(cChatColor.Purple .. "Kills: " .. cChatColor.LightGreen .. Stats.Kills)
-			a_Player:SendMessage(cChatColor.Purple .. "TeamAttacks: " .. cChatColor.LightGreen .. Stats.TeamAttacks)
-			a_Player:SendMessage(cChatColor.Purple .. "ShotsFired: " .. cChatColor.LightGreen .. Stats.ShotsFired)
+		local SendStats
+		if (HasStarted) then
+			function SendStats(a_Player)
+				a_Player:SendMessage(cChatColor.Purple .. "Kills: " .. cChatColor.LightGreen .. Stats.Kills)
+				a_Player:SendMessage(cChatColor.Purple .. "TeamAttacks: " .. cChatColor.LightGreen .. Stats.TeamAttacks)
+				a_Player:SendMessage(cChatColor.Purple .. "ShotsFired: " .. cChatColor.LightGreen .. Stats.ShotsFired)
+			end
+		else
+			SendStats = function() end
 		end
 		
 		-- Teleport everyone to the lobby.
@@ -194,11 +198,13 @@ function CreateArenaState(a_WorldName, a_LobbySpawn)
 		{
 			Kills = 0,
 			TeamAttacks = 0,
+			ShotsFired = 0,
 		}
 		
 		-- Reset the inventories.
 		Inventories = {}
-			
+		
+		HasStarted = false
 	end
 	
 	
