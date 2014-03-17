@@ -585,6 +585,45 @@ function CreateArenaState(a_WorldName, a_LobbySpawn)
 			Stats.ShotsFired = Stats.ShotsFired + 1
 		end
 	end
+	
+	
+	
+	
+	
+	function self:CollectTop5Players()
+		local Top5 = {}
+		
+		local function HandlePlayer(PlayerName, PlayerInfo, PrefixColor)
+			if (#Top5 == 0) then
+				table.insert(Top5, {PlayerName = PlayerName, Kills = PlayerInfo.Kills, Color = PrefixColor})
+				return
+			end
+			
+			for Idx = 1, #Top5 do
+				if (Top5[Idx] == nil) then
+					table.insert(Top5, Idx, {PlayerName = PlayerName, Kills = PlayerInfo.Kills, Color = PrefixColor})
+					break
+				else
+					if (Top5[Idx].Kills < PlayerInfo.Kills) then
+						table.insert(Top5, Idx, {PlayerName = PlayerName, Kills = PlayerInfo.Kills, Color = PrefixColor})
+					elseif (#Top5 < 5) then
+						table.insert(Top5, {PlayerName = PlayerName, Kills = PlayerInfo.Kills, Color = PrefixColor})
+					end
+				end
+			end
+		end
+		
+		for PlayerName, PlayerInfo in pairs(Teams.Red) do
+			HandlePlayer(PlayerName, PlayerInfo, cChatColor.Rose)
+		end
+		
+		for PlayerName, PlayerInfo in pairs(Teams.Blue) do
+			HandlePlayer(PlayerName, PlayerInfo, cChatColor.Blue)
+		end
+	
+		return Top5
+	end
+	
 	return self
 end
 
