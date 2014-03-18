@@ -1,4 +1,3 @@
-
 -- This file implements all the hook handlers.
 
 
@@ -133,6 +132,10 @@ function OnSpawnedEntity(a_World, a_Entity)
 	end
 	
 	local Creator = Projectile:GetCreator()
+	
+	if (Creator == nil) then
+		return false
+	end
 	
 	if (not Creator:IsPlayer()) then
 		return false
