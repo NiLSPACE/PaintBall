@@ -11,30 +11,30 @@ function CreateArenaState(a_WorldName, a_LobbySpawn)
 	assert(cRoot:Get():GetWorld(a_WorldName) ~= nil)
 	assert(tolua.type(a_LobbySpawn) == 'Vector3<float>')
 	
-	local WorldName = a_WorldName
+	local m_WorldName = a_WorldName
 	local LobbySpawn = a_LobbySpawn
 	
-	local HasStarted = false
+	local m_HasStarted = false
 	
-	local SpawnPointsBlue = {}
-	local SpawnPointsRed = {}
-	local SpawnPointsSpectator = {}
+	local m_SpawnPointsBlue = {}
+	local m_SpawnPointsRed = {}
+	local m_SpawnPointsSpectator = {}
 	
-	local Teams = 
+	local m_Teams = 
 	{
 		Blue = {}, 
 		Red = {}, 
 		Spectator = {}
 	}
 	
-	local Stats =
+	local m_Stats =
 	{
 		Kills = 0,
 		TeamAttacks = 0,
 		ShotsFired = 0,
 	}
 	
-	local Inventories = {}
+	local m_Inventories = {}
 		
 	
 	-- Create the object with all the functions.
@@ -43,10 +43,10 @@ function CreateArenaState(a_WorldName, a_LobbySpawn)
 	-- Loops through each player and calls the given callback with the player object as parameter.
 	function self:ForEachPlayer(a_Callback)
 		assert(type(a_Callback) == 'function')
-		local World = cRoot:Get():GetWorld(WorldName)
+		local World = cRoot:Get():GetWorld(m_WorldName)
 		local ShouldStop = false
 		
-		for TeamName, PlayerList in pairs(Teams) do
+		for TeamName, PlayerList in pairs(m_Teams) do
 			for PlayerName, _ in pairs(PlayerList) do
 				if (ShouldStop) then
 					return
@@ -78,7 +78,7 @@ function CreateArenaState(a_WorldName, a_LobbySpawn)
 	
 	-- Returns if the arena has started or not.
 	function self:HasStarted()
-		return HasStarted
+		return m_HasStarted
 	end
 	
 	
@@ -87,59 +87,59 @@ function CreateArenaState(a_WorldName, a_LobbySpawn)
 	
 	-- Starts the arena and teleports all the players to one of the spawn points of their team.
 	function self:StartArena()
-		HasStarted = true
+		m_HasStarted = true
 		
-		local World = cRoot:Get():GetWorld(WorldName)
+		local World = cRoot:Get():GetWorld(m_WorldName)
 		
 		-- Teleport everyone to one of the spawnpoints of their team. 
 		-- The red players
-		for PlayerName, _ in pairs(Teams.Red) do
+		for PlayerName, _ in pairs(m_Teams.Red) do
 			World:DoWithPlayer(PlayerName, 
 				function(a_Player)
-					local Coords = SpawnPointsRed[math.random(1, #SpawnPointsRed)]
+					local Coords = m_SpawnPointsRed[math.random(1, #m_SpawnPointsRed)]
 					a_Player:TeleportToCoords(Coords.x, Coords.y, Coords.z)
 					
 					local Items = cItems()
 					a_Player:GetInventory():CopyToItems(Items)
-					Inventories[PlayerName] = Items
+					m_Inventories[PlayerName] = Items
 					
 					GiveSnowballs(a_Player)
-					Teams.Red[PlayerName].IsPlaying = true
+					m_Teams.Red[PlayerName].IsPlaying = true
 					a_Player:SendMessage(cChatColor.Rose .. "Game started.")
 				end
 			) -- cWorld:DoWithPlayer
 		end
 		
 		-- The blue players
-		for PlayerName, _ in pairs(Teams.Blue) do
+		for PlayerName, _ in pairs(m_Teams.Blue) do
 			World:DoWithPlayer(PlayerName, 
 				function(a_Player)
-					local Coords = SpawnPointsBlue[math.random(1, #SpawnPointsBlue)]
+					local Coords = m_SpawnPointsBlue[math.random(1, #m_SpawnPointsBlue)]
 					a_Player:TeleportToCoords(Coords.x, Coords.y, Coords.z)
 					
 					local Items = cItems()
 					a_Player:GetInventory():CopyToItems(Items)
-					Inventories[PlayerName] = Items
+					m_Inventories[PlayerName] = Items
 					
 					GiveSnowballs(a_Player)
-					Teams.Blue[PlayerName].IsPlaying = true
+					m_Teams.Blue[PlayerName].IsPlaying = true
 					a_Player:SendMessage(cChatColor.Rose .. "Game started.")
 				end
 			) -- cWorld:DoWithPlayer
 		end
 		
 		-- The spectators
-		for PlayerName, _ in pairs(Teams.Spectator) do
+		for PlayerName, _ in pairs(m_Teams.Spectator) do
 			World:DoWithPlayer(PlayerName, 
 				function(a_Player)
-					local Coords = SpawnPointsSpectator[math.random(1, #SpawnPointsSpectator)]
+					local Coords = m_SpawnPointsSpectator[math.random(1, #m_SpawnPointsSpectator)]
 					a_Player:TeleportToCoords(Coords.x, Coords.y, Coords.z)
 					
 					local Items = cItems()
 					a_Player:GetInventory():CopyToItems(Items)
-					Inventories[PlayerName] = Items
+					m_Inventories[PlayerName] = Items
 					
-					Teams.Spectator[PlayerName].IsPlaying = true
+					m_Teams.Spectator[PlayerName].IsPlaying = true
 					a_Player:SendMessage(cChatColor.Rose .. "Game started.")
 				end
 			) -- cWorld:DoWithPlayer
@@ -154,11 +154,11 @@ function CreateArenaState(a_WorldName, a_LobbySpawn)
 	function self:StopArena(a_ShouldShowStopMessage)
 		
 		local SendStats
-		if (HasStarted) then
+		if (m_HasStarted) then
 			function SendStats(a_Player)
-				a_Player:SendMessage(cChatColor.Purple .. "Kills: " .. cChatColor.LightGreen .. Stats.Kills)
-				a_Player:SendMessage(cChatColor.Purple .. "TeamAttacks: " .. cChatColor.LightGreen .. Stats.TeamAttacks)
-				a_Player:SendMessage(cChatColor.Purple .. "ShotsFired: " .. cChatColor.LightGreen .. Stats.ShotsFired)
+				a_Player:SendMessage(cChatColor.Purple .. "Kills: " .. cChatColor.LightGreen .. m_Stats.Kills)
+				a_Player:SendMessage(cChatColor.Purple .. "TeamAttacks: " .. cChatColor.LightGreen .. m_Stats.TeamAttacks)
+				a_Player:SendMessage(cChatColor.Purple .. "ShotsFired: " .. cChatColor.LightGreen .. m_Stats.ShotsFired)
 			end
 		else
 			SendStats = function() end
@@ -172,10 +172,10 @@ function CreateArenaState(a_WorldName, a_LobbySpawn)
 				end
 				
 				-- Return the inventory to the player.
-				if (Inventories[a_Player:GetName()] ~= nil) then
+				if (m_Inventories[a_Player:GetName()] ~= nil) then
 					local Inventory = a_Player:GetInventory()
 					Inventory:Clear()
-					Inventory:AddItems(Inventories[a_Player:GetName()], true, true)
+					Inventory:AddItems(m_Inventories[a_Player:GetName()], true, true)
 				end
 				
 				SendStats(a_Player)
@@ -186,7 +186,7 @@ function CreateArenaState(a_WorldName, a_LobbySpawn)
 		) -- self:ForEachPlayer
 		
 		-- Reset the teams.
-		Teams = 
+		m_Teams = 
 		{
 			Blue = {}, 
 			Red = {}, 
@@ -194,7 +194,7 @@ function CreateArenaState(a_WorldName, a_LobbySpawn)
 		}
 		
 		-- Reset the stats.
-		Stats =
+		m_Stats =
 		{
 			Kills = 0,
 			TeamAttacks = 0,
@@ -202,9 +202,9 @@ function CreateArenaState(a_WorldName, a_LobbySpawn)
 		}
 		
 		-- Reset the inventories.
-		Inventories = {}
+		m_Inventories = {}
 		
-		HasStarted = false
+		m_HasStarted = false
 	end
 	
 	
@@ -213,8 +213,6 @@ function CreateArenaState(a_WorldName, a_LobbySpawn)
 	
 	-- Sends an message to all the players who have joined 
 	function self:BroadcastMessage(a_Message)
-		local World = cRoot:Get():GetWorld(a_WorldName)
-		
 		self:ForEachPlayer(
 			function(a_Player)
 				a_Player:SendMessage(a_Message)
@@ -232,21 +230,21 @@ function CreateArenaState(a_WorldName, a_LobbySpawn)
 		function self:AddSpawnPointBlue(a_Pos)
 			assert(tolua.type(a_Pos) == 'Vector3<float>')
 			
-			table.insert(SpawnPointsBlue, a_Pos)
+			table.insert(m_SpawnPointsBlue, a_Pos)
 		end
 		
 		-- Add one spawnpoint to the red team.
 		function self:AddSpawnPointRed(a_Pos)
 			assert(tolua.type(a_Pos) == 'Vector3<float>')
 			
-			table.insert(SpawnPointsRed, a_Pos)
+			table.insert(m_SpawnPointsRed, a_Pos)
 		end
 		
 		-- Add one spawnpoint to the spectators.
 		function self:AddSpawnPointSpectator(a_Pos)
 			assert(tolua.type(a_Pos) == 'Vector3<float>')
 			
-			table.insert(SpawnPointsSpectator, a_Pos)
+			table.insert(m_SpawnPointsSpectator, a_Pos)
 		end
 	end
 	
@@ -258,47 +256,47 @@ function CreateArenaState(a_WorldName, a_LobbySpawn)
 	do
 		-- Returns one of the spawnpoints from the red team randomly:
 		function self:GetRandomRedSpawn()
-			return SpawnPointsRed[math.random(1, #SpawnPointsRed)]
+			return m_SpawnPointsRed[math.random(1, #SpawnPointsRed)]
 		end
 		
 		-- Returns one of the spawnpoints from the red team randomly:
 		function self:GetRandomBlueSpawn()
-			return SpawnPointsBlue[math.random(1, #SpawnPointsBlue)]
+			return m_SpawnPointsBlue[math.random(1, #SpawnPointsBlue)]
 		end
 		
 		-- Returns one of the spawnpoints from the spectators randomly:
 		function self:GetRandomSpectatorSpawn()
-			return SpawnPointsSpectator[math.random(1, #SpawnPointsSpectator)]
+			return m_SpawnPointsSpectator[math.random(1, #SpawnPointsSpectator)]
 		end
 		
 		-- Returns the table where all the red spawnpoints are in.
 		function self:GetRedSpawnpoints()
-			return SpawnPointsRed
+			return m_SpawnPointsRed
 		end
 		
 		-- Returns the table where all the blue spawnpoints are in.
 		function self:GetBlueSpawnpoints()
-			return SpawnPointsBlue
+			return m_SpawnPointsBlue
 		end
 		
 		-- Returns the table where all the spectator spawnpoints are in.
 		function self:GetSpectatorSpawnpoints()
-			return SpawnPointsSpectator
+			return m_SpawnPointsSpectator
 		end
 		
 		-- returns the amount of spawnpoints team red has.
 		function self:GetNumRedSpawnpoints()
-			return #SpawnPointsRed
+			return #m_SpawnPointsRed
 		end
 		
 		-- returns the amount of spawnpoints team blue has.
 		function self:GetNumBlueSpawnpoints()
-			return #SpawnPointsBlue
+			return #m_SpawnPointsBlue
 		end
 		
 		-- returns the amount of spawnpoints the spectators have.
 		function self:GetNumSpectatorSpawnpoints()
-			return #SpawnPointsSpectator
+			return #m_SpawnPointsSpectator
 		end
 	end
 	
@@ -311,7 +309,7 @@ function CreateArenaState(a_WorldName, a_LobbySpawn)
 		-- Amount of playing red players.
 		function self:GetNumPlayingRedPlayers()
 			local Count = 0
-			for PlayerName, Data in pairs(Teams.Red) do
+			for PlayerName, Data in pairs(m_Teams.Red) do
 				if (Data.IsPlaying) then
 					Count = Count + 1
 				end
@@ -323,7 +321,7 @@ function CreateArenaState(a_WorldName, a_LobbySpawn)
 		-- Amount of playing blue players
 		function self:GetNumPlayingBluePlayers()
 			local Count = 0
-			for PlayerName, Data in pairs(Teams.Blue) do
+			for PlayerName, Data in pairs(m_Teams.Blue) do
 				if (Data.IsPlaying) then
 					Count = Count + 1
 				end
@@ -340,7 +338,7 @@ function CreateArenaState(a_WorldName, a_LobbySpawn)
 		-- Returns the amount of red players
 		function self:GetNumRedPlayers()
 			local Count = 0
-			for PlayerName, Data in pairs(Teams.Red) do
+			for PlayerName, Data in pairs(m_Teams.Red) do
 				Count = Count + 1
 			end
 			
@@ -350,7 +348,7 @@ function CreateArenaState(a_WorldName, a_LobbySpawn)
 		-- Returns the amount of blue players
 		function self:GetNumBluePlayers()
 			local Count = 0
-			for PlayerName, Data in pairs(Teams.Blue) do
+			for PlayerName, Data in pairs(m_Teams.Blue) do
 				Count = Count + 1
 			end
 			
@@ -370,7 +368,7 @@ function CreateArenaState(a_WorldName, a_LobbySpawn)
 	-- JoinTeam functions.
 	do
 		local function CheckIfCanStart()
-			if HasStarted then
+			if (m_HasStarted) then
 				return
 			end
 			
@@ -386,7 +384,7 @@ function CreateArenaState(a_WorldName, a_LobbySpawn)
 		
 		-- Join red team.
 		function self:JoinRedTeam(a_PlayerName)
-			Teams.Red[a_PlayerName] = 
+			m_Teams.Red[a_PlayerName] = 
 			{
 				Kills = 0,
 				Deaths = 0,
@@ -399,7 +397,7 @@ function CreateArenaState(a_WorldName, a_LobbySpawn)
 		
 		-- Join blue team.
 		function self:JoinBlueTeam(a_PlayerName)
-			Teams.Blue[a_PlayerName] = 
+			m_Teams.Blue[a_PlayerName] = 
 			{
 				Kills = 0,
 				Deaths = 0,
@@ -412,7 +410,7 @@ function CreateArenaState(a_WorldName, a_LobbySpawn)
 		
 		-- Join spectator. A spectator doesn't have any kills or deaths so we just mark him as "There"
 		function self:JoinSpectators(a_PlayerName)
-			Teams.Spectator[a_PlayerName] = true
+			m_Teams.Spectator[a_PlayerName] = true
 			
 			CheckIfCanStart()
 		end
@@ -444,7 +442,7 @@ function CreateArenaState(a_WorldName, a_LobbySpawn)
 	
 	-- Just teleport the player to the lobby and remove the player from all the teams.
 	function self:LeaveArena(a_PlayerName)
-		local World = cRoot:Get():GetWorld(WorldName)
+		local World = cRoot:Get():GetWorld(m_WorldName)
 		
 		World:DoWithPlayer(a_PlayerName,
 			function(a_Player)
@@ -452,9 +450,9 @@ function CreateArenaState(a_WorldName, a_LobbySpawn)
 			end
 		)
 		
-		Teams.Red[a_PlayerName] = nil
-		Teams.Blue[a_PlayerName] = nil
-		Teams.Spectator[a_PlayerName] = nil
+		m_Teams.Red[a_PlayerName] = nil
+		m_Teams.Blue[a_PlayerName] = nil
+		m_Teams.Spectator[a_PlayerName] = nil
 		
 		self:CheckIfEnoughPlayers()
 	end
@@ -465,7 +463,7 @@ function CreateArenaState(a_WorldName, a_LobbySpawn)
 	
 	-- Returns the the table wich contains all the teams
 	function self:GetTeams()
-		return Teams
+		return m_Teams
 	end
 	
 	
@@ -474,7 +472,7 @@ function CreateArenaState(a_WorldName, a_LobbySpawn)
 	
 	-- Returns the name wich the arena is in.
 	function self:GetWorldName()
-		return WorldName
+		return m_WorldName
 	end
 	
 	
@@ -483,7 +481,7 @@ function CreateArenaState(a_WorldName, a_LobbySpawn)
 	
 	-- Checks if one of the teams doesn't have enough players to keep playing.
 	function self:CheckIfEnoughPlayers()
-		if (not HasStarted) then
+		if (not m_HasStarted) then
 			return
 		end
 		
@@ -508,7 +506,7 @@ function CreateArenaState(a_WorldName, a_LobbySpawn)
 	
 	-- Returns the player info of a player. false if it doesn't exist.
 	function self:GetPlayerInfo(a_PlayerName)
-		return (Teams.Red[a_PlayerName] or Teams.Blue[a_PlayerName] or false)
+		return (m_Teams.Red[a_PlayerName] or m_Teams.Blue[a_PlayerName] or false)
 	end
 	
 	
@@ -521,7 +519,7 @@ function CreateArenaState(a_WorldName, a_LobbySpawn)
 		local AttackerName = a_Attacker:GetName()
 		local ReceiverName = a_Receiver:GetName()
 		
-		if (Teams.Red[AttackerName]) then
+		if (m_Teams.Red[AttackerName]) then
 			ColorPrefix = cChatColor.Rose
 		end
 		
@@ -572,17 +570,17 @@ function CreateArenaState(a_WorldName, a_LobbySpawn)
 	do
 		-- Add one to the kills stats.
 		function self:AddStatsKills()
-			Stats.Kills = Stats.Kills + 1
+			m_Stats.Kills = m_Stats.Kills + 1
 		end
 		
 		-- Add one to the TeamFire stats.
 		function self:AddStatsTeamFire()
-			Stats.TeamAttacks = Stats.TeamAttacks + 1
+			m_Stats.TeamAttacks = m_Stats.TeamAttacks + 1
 		end
 		
 		-- Add one to the shots fired stats.
 		function self:AddStatsShotsFired()
-			Stats.ShotsFired = Stats.ShotsFired + 1
+			m_Stats.ShotsFired = m_Stats.ShotsFired + 1
 		end
 	end
 	
@@ -613,11 +611,11 @@ function CreateArenaState(a_WorldName, a_LobbySpawn)
 			end
 		end
 		
-		for PlayerName, PlayerInfo in pairs(Teams.Red) do
+		for PlayerName, PlayerInfo in pairs(m_Teams.Red) do
 			HandlePlayer(PlayerName, PlayerInfo, cChatColor.Rose)
 		end
 		
-		for PlayerName, PlayerInfo in pairs(Teams.Blue) do
+		for PlayerName, PlayerInfo in pairs(m_Teams.Blue) do
 			HandlePlayer(PlayerName, PlayerInfo, cChatColor.Blue)
 		end
 	
