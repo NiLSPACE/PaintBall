@@ -134,6 +134,10 @@ function OnSpawnedEntity(a_World, a_Entity)
 	
 	local Creator = Projectile:GetCreator()
 	
+	if (Creator == nil) then
+		return false
+	end
+	
 	if (not Creator:IsPlayer()) then
 		return false
 	end
