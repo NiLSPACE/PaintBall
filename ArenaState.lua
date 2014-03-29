@@ -256,17 +256,17 @@ function CreateArenaState(a_WorldName, a_LobbySpawn)
 	do
 		-- Returns one of the spawnpoints from the red team randomly:
 		function self:GetRandomRedSpawn()
-			return m_SpawnPointsRed[math.random(1, #SpawnPointsRed)]
+			return m_SpawnPointsRed[math.random(1, #m_SpawnPointsRed)]
 		end
 		
 		-- Returns one of the spawnpoints from the red team randomly:
 		function self:GetRandomBlueSpawn()
-			return m_SpawnPointsBlue[math.random(1, #SpawnPointsBlue)]
+			return m_SpawnPointsBlue[math.random(1, #m_SpawnPointsBlue)]
 		end
 		
 		-- Returns one of the spawnpoints from the spectators randomly:
 		function self:GetRandomSpectatorSpawn()
-			return m_SpawnPointsSpectator[math.random(1, #SpawnPointsSpectator)]
+			return m_SpawnPointsSpectator[math.random(1, #m_SpawnPointsSpectator)]
 		end
 		
 		-- Returns the table where all the red spawnpoints are in.
