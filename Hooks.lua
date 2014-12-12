@@ -34,29 +34,36 @@ function OnTakeDamage(a_Receiver, a_TDI)
 		return true
 	end
 	
-	local Creator = Projectile:GetCreator()
-	if (not Creator:IsPlayer()) then
-		return true
-	end
+	local Succes = false
+	local World = Projectile:GetWorld()
+	local CreatorID = Projectile:GetCreatorUniqueID()
+	World:DoWithEntityByID(CreatorID,
+		function(a_Creator)
+			if (not a_Creator:IsPlayer()) then
+				return true
+			end
+			
+			local Attacker = tolua.cast(a_Creator, "cPlayer")
+			local AttackerName = Attacker:GetName()
+			local AttackerState = GetPlayerState(Attacker)
+			
+			-- Don't let other players who are not in an arena affect playing people.
+			if (not AttackerState:HasJoinedArena()) then
+				return true
+			end
 	
-	local Attacker = tolua.cast(Creator, "cPlayer")
-	local AttackerName = Attacker:GetName()
-	local AttackerState = GetPlayerState(Attacker)
-	
-	-- Don't let other players who are not in an arena affect playing people.
-	if (not AttackerState:HasJoinedArena()) then
-		return true
-	end
-	
-	if (ReceiverState:GetJoinedArena() ~= AttackerState:GetJoinedArena()) then -- Wut?? Somebody from another arena attacked this player. Let's stop it.
-		return true
-	end
-	
-	local Arena = ReceiverState:GetJoinedArena()
-	local ArenaState = GetArenaState(Arena)
-	
-	ArenaState:HitPlayer(Attacker, Receiver)
-	return true
+			if (ReceiverState:GetJoinedArena() ~= AttackerState:GetJoinedArena()) then -- Wut?? Somebody from another arena attacked this player. Let's stop it.
+				return true
+			end
+			
+			local Arena = ReceiverState:GetJoinedArena()
+			local ArenaState = GetArenaState(Arena)
+			
+			ArenaState:HitPlayer(Attacker, Receiver)
+			Succes = true
+		end
+	)
+	return Succes
 end
 
 
@@ -132,17 +139,27 @@ function OnSpawnedEntity(a_World, a_Entity)
 		return false
 	end
 	
-	local Creator = Projectile:GetCreator()
+	local PlayerState;
+	local World = Projectile:GetWorld()
+	local CreatorID = Projectile:GetCreatorID()
+	World:DoWithEntityByID(CreatorID,
+		function(a_Creator)
+			if (a_Creator == nil) then
+				return false
+			end
+			
+			if (not a_Creator:IsPlayer()) then
+				return false
+			end
+			
+			PlayerState = GetPlayerState(a_Creator)
+		end
+	)
 	
-	if (Creator == nil) then
+	if (not PlayerState) then
 		return false
 	end
 	
-	if (not Creator:IsPlayer()) then
-		return false
-	end
-	
-	local PlayerState = GetPlayerState(Creator)
 	if (not PlayerState:HasJoinedArena()) then
 		return false
 	end
