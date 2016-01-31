@@ -141,7 +141,7 @@ function OnSpawnedEntity(a_World, a_Entity)
 	
 	local PlayerState;
 	local World = Projectile:GetWorld()
-	local CreatorID = Projectile:GetCreatorID()
+	local CreatorID = Projectile:GetCreatorUniqueID()
 	World:DoWithEntityByID(CreatorID,
 		function(a_Creator)
 			if (a_Creator == nil) then
